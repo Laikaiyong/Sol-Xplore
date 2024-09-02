@@ -20,10 +20,8 @@ const WalletProviders = ({ children }) => {
 
   // You can also provide a custom RPC endpoint.
   const endpoint =
-    network == WalletAdapterNetwork.Mainnet
-      ? useMemo(() => process.env.NEXT_PUBLIC_MAINNET, [network])
-      : useMemo(() => clusterApiUrl(network), [network]);
-
+    useMemo(() => network == WalletAdapterNetwork.Mainnet
+    ? process.env.NEXT_PUBLIC_MAINNET : clusterApiUrl(network), [network])
   const wallets = useMemo(
     () => [
       /**
