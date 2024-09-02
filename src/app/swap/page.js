@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
 const SwapPage = () => {
   const { publicKey, signTransaction } = useWallet();
@@ -27,33 +26,48 @@ const SwapPage = () => {
 
   const fetchBalance = async () => {
     const balance = await connection.getBalance(publicKey);
-    
     setBalance(balance / 1e9); // Convert lamports to SOL
   };
 
   const handleSwap = async () => {
     setIsLoading(true);
     try {
-      const connection = WalletAdapterNetwork.Mainnet;
-      const jupiter = await Jupiter.load({
-        connection,
-        cluster: 'mainnet-beta',
-        user: publicKey,
-      });
+      const inputMint = 'So11111111111111111111111111111111111111112'; // SOL mint address
+      const outputMint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // USDC mint address
+      const amount = inputAmount * 1e9; // Convert to lamports
 
-      const routes = await jupiter.computeRoutes({
-        inputMint: new PublicKey('So11111111111111111111111111111111111111112'), // SOL mint address
-        outputMint: new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'), // USDC mint address
-        amount: inputAmount * 1e9, // Convert to lamports
-        slippageBps: 50, // 0.5% slippage
-      });
+      // Step 1: Fetch routes
+      const routesResponse = await fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`);
+      const routes = await routesResponse.json();
 
-      const { execute } = await jupiter.exchange({
-        routeInfo: routes.routesInfos[0],
-      });
+      if (!routes.data || routes.data.length === 0) {
+        throw new Error('No routes found');
+      }
 
-      const swapResult = await execute(signTransaction);
-      console.log('Swap executed:', swapResult);
+      // Step 2: Get serialized transactions
+      const { swapTransaction } = await fetch('https://quote-api.jup.ag/v6/swap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          quoteResponse: routes.data[0],
+          userPublicKey: publicKey.toString(),
+          wrapUnwrapSOL: true
+        })
+      }).then(res => res.json());
+
+      // Step 3: Deserialize and sign the transaction
+      const transaction = await connection.deserializeTransaction(swapTransaction);
+      const signedTransaction = await signTransaction(transaction);
+
+      // Step 4: Execute the swap
+      const txid = await connection.sendRawTransaction(signedTransaction.serialize());
+      await connection.confirmTransaction({
+        signature: txid
+    });
+
+      console.log('Swap executed:', txid);
       
       // Refresh balance after swap
       fetchBalance();
@@ -125,10 +139,10 @@ const SwapPage = () => {
               </div>
             </div>
             {
-                connection != WalletAdapterNetwork.Mainnet &&
+                connection.rpcEndpoint != process.env.NEXT_PUBLIC_MAINNET &&
                 <p>Only available on Mainnet</p>
             }
-            <Button onClick={handleSwap} disabled={(isLoading || !inputAmount) && connection != WalletAdapterNetwork.Mainnet}>
+            <Button onClick={handleSwap} disabled={(isLoading || !inputAmount) && connection.rpcEndpoint != process.env.NEXT_PUBLIC_MAINNET}>
               {isLoading ? 'Swapping...' : 'Swap'}
             </Button>
           </div>
