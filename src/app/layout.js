@@ -8,6 +8,18 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "SolXplore",
   description: "Explore your Solana onchain activities",
+  openGraph: {
+		title: "SolXplore",
+		description: "Explore your Solana onchain activities",
+		images: ["/logo.png"],
+	},
+	twitter: {
+		card: "summary",
+		site: "SolXplore",
+		title: "SolXplore",
+		description: "Explore your Solana onchain activities",
+		images: ["/logo.png"],
+	},
 };
 
 export default function RootLayout({ children }) {
