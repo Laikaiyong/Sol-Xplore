@@ -22,7 +22,7 @@ const SwapPage = () => {
     if (publicKey) {
       fetchBalance();
     }
-  }, [publicKey, connection]);
+  }, [publicKey, connection, fetchBalance]);
 
   const fetchBalance = async () => {
     const balance = await connection.getBalance(publicKey);
@@ -138,11 +138,7 @@ const SwapPage = () => {
                 </Select>
               </div>
             </div>
-            {
-                connection.rpcEndpoint != process.env.NEXT_PUBLIC_MAINNET &&
-                <p>Only available on Mainnet</p>
-            }
-            <Button onClick={handleSwap} disabled={isLoading || !inputAmount || connection.rpcEndpoint != process.env.NEXT_PUBLIC_MAINNET}>
+            <Button onClick={handleSwap} disabled={isLoading || !inputAmount}>
               {isLoading ? 'Swapping...' : 'Swap'}
             </Button>
           </div>
