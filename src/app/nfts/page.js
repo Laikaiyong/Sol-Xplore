@@ -45,7 +45,7 @@ const NFTGallery = () => {
     setLoading(true);
     try {
       const nftArray = await getParsedNftAccountsByOwner({
-        publicAddress: "7EJDzcFBtEkCK3Ej7iZtqntuuhgx8AmveR16zrc74hGt",
+        publicAddress: publicKey,
         connection: connection,
         limit: 3,
         serialization: true,
