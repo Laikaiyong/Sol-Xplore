@@ -142,7 +142,7 @@ const SwapPage = () => {
                 connection.rpcEndpoint != process.env.NEXT_PUBLIC_MAINNET &&
                 <p>Only available on Mainnet</p>
             }
-            <Button onClick={handleSwap} disabled={(isLoading || !inputAmount) && connection.rpcEndpoint != process.env.NEXT_PUBLIC_MAINNET}>
+            <Button onClick={handleSwap} disabled={isLoading || !inputAmount || connection.rpcEndpoint != process.env.NEXT_PUBLIC_MAINNET}>
               {isLoading ? 'Swapping...' : 'Swap'}
             </Button>
           </div>
