@@ -57,7 +57,7 @@ const Dashboard = () => {
     if (connected && publicKey) {
       fetchTokenBalances();
     }
-  }, [connected, publicKey, connection, fetchTokenBalances]);
+  }, [connected, publicKey, connection]);
 
   const getTokenSymbol = (mint) => {
     var knownTokens = {

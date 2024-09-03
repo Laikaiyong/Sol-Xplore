@@ -22,7 +22,7 @@ const SwapPage = () => {
     if (publicKey) {
       fetchBalance();
     }
-  }, [publicKey, connection, fetchBalance]);
+  }, [publicKey, connection]);
 
   const fetchBalance = async () => {
     const balance = await connection.getBalance(publicKey);
@@ -33,7 +33,7 @@ const SwapPage = () => {
     setIsLoading(true);
     try {
       const inputMint = 'So11111111111111111111111111111111111111112'; // SOL mint address
-      const outputMint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // USDC mint address
+      const outputMint = connection.rpcEndpoint == "https://api.devnet.solana.com" ? "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU" : 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // USDC mint address
       const amount = inputAmount * 1e9; // Convert to lamports
 
       // Step 1: Fetch routes
